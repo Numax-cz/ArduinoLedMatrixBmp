@@ -1,0 +1,1 @@
+This program supports only .bmp 32x32px 24bit rgb format 
