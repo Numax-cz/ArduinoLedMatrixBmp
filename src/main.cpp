@@ -8,6 +8,7 @@
 #define PIN_CS 4                  // Pin pro SD kartu
 #define BACKGROUND_COLOR 0x000000 // Černá barva pozadí
 
+// Inicializace panelu
 Adafruit_NeoPixel panel = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
 
 void showImage(String fileName) {
@@ -16,8 +17,6 @@ void showImage(String fileName) {
 
   // Pokud se obrázek otevře provede se následující
   if (bmpFile) {
-
-
     // Nastavení jasu
     panel.setBrightness(JAS);
     // Inicializace NeoPixel
@@ -29,7 +28,7 @@ void showImage(String fileName) {
 
     // Zkontrolujte, zda je soubor platný BMP
     if (bmpHeader[0] != 'B' || bmpHeader[1] != 'M') {
-      Serial.println("Nepodporovaný formát souboru.");
+      Serial.println("Nepodporovaný formát souboru!");
       bmpFile.close();
       return;
     }
@@ -64,16 +63,17 @@ void showImage(String fileName) {
         byte red = bmpFile.read();
 
         // Výpočet indexu pixelu na LED panelu
-        int pixelIndex = (32 - x) * 33 + (32 - y); // nebo jiný výpočet v závislosti na orientaci panelu
+        int pixelIndex = (32 - x) * 33 + (32 - y); //Jiný výpočet podle závislosti na orientaci panelu
 
         // Nastav barvu pixelu
         panel.setPixelColor(pixelIndex, panel.Color(red, green, blue));
       }
     }
+    // Vykreslení panelu
     panel.show();
   }
   else {
-    Serial.println("Nepodařilo se otevřít soubor obrazek.jpg");
+    Serial.println("Nepodařilo se otevřít soubor :(");
   }
 }
 
@@ -101,11 +101,12 @@ void printBmpFiles() {
 
 void setup() {
   Serial.begin(9600);
+  // Načtení SD karty
   if (!SD.begin(PIN_CS)) {
     Serial.println("SD karta nebyla načtena :(");
     while (true);
   }
-  Serial.println("SD karta byla úspěšně inicializována.");
+  Serial.println("SD karta byla úspěšně načtena :)");
 
   printBmpFiles(); // Volání funkce pro vypsání souborů
 
