@@ -1,15 +1,29 @@
 #include <Adafruit_NeoPixel.h>
 #include <SPI.h>
 #include <SD.h>
+#include <IRremote.h>
 
+
+#define IR_PIN 49
 #define LED_PIN 36                // Pin připojený k datovému pinu panelu
 #define LED_COUNT 1089            // 33x33 pixelů = 1089 LED diod
 #define JAS 30                    // Jas displeje
 #define PIN_CS 4                  // Pin pro SD kartu
 #define BACKGROUND_COLOR 0x000000 // Černá barva pozadí
 
+#define POWER_BUTTON 0
+#define VOLUME_BUTTON_UP 0
+#define VOLUME_BUTTON_DOWN 0
+
+//Proměnná doby, po kterou se má přečíst další obrázek
+const int data_read_period = 1000;
+unsigned long data_read_time_now = 0;
+bool animation_running = false;
+
 // Inicializace panelu
 Adafruit_NeoPixel panel = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
+IRrecv recv(IR_PIN);
+decode_results results;
 
 void showImage(String fileName) {
   // Otevření souboru pro čtení
@@ -71,9 +85,11 @@ void showImage(String fileName) {
     }
     // Vykreslení panelu
     panel.show();
+    bmpFile.close();
   }
   else {
-    Serial.println("Nepodařilo se otevřít soubor :(");
+    Serial.println("Nepodařilo se otevřít soubor :( ");
+    Serial.print(fileName);
   }
 }
 
@@ -101,27 +117,47 @@ void printBmpFiles() {
 
 void setup() {
   Serial.begin(9600);
+ 
   // Načtení SD karty
   if (!SD.begin(PIN_CS)) {
     Serial.println("SD karta nebyla načtena :(");
     while (true);
   }
   Serial.println("SD karta byla úspěšně načtena :)");
-
+  digitalWrite(49,HIGH);
   printBmpFiles(); // Volání funkce pro vypsání souborů
 
 }
 
 void loop() {
 
+  //Uložíme aktuální čas běhu do konstantní proměnné time 
+  const unsigned long time = millis();
+
+
+  if(recv.decode(&results)) {
+    if (results.value) Serial.println(results.value);
+  }
+
 
   
-
-  for (int i = 1; i <= 19; i++) {
+  //Načasování programu
+  //if(time >= data_read_time_now + data_read_period) {
+  //  data_read_time_now += data_read_period;
+  //}
+  
+  if (!animation_running) {
+    for (int i = 1; i <= 19; i++) {
+      animation_running = true;
       String imageName = "image" + String(i) + ".bmp";
       showImage(imageName);
 
-      
+    
+      if(i == 19) {
+        animation_running = false;
+      }
+    }
   }
+
 
 }
