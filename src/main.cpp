@@ -3,7 +3,6 @@
 #include <SD.h>
 #include <IRremote.h>
 
-
 #define IR_PIN 49
 #define LED_PIN 36                // Pin připojený k datovému pinu panelu
 #define LED_COUNT 1089            // 33x33 pixelů = 1089 LED diod
@@ -46,14 +45,6 @@ void showImage(String fileName) {
     uint32_t width = *(uint32_t *)&bmpHeader[18];
     uint32_t height = *(uint32_t *)&bmpHeader[22];
     uint32_t bits = *(uint32_t *)&bmpHeader[28];
-    //Serial.print("RGB bits: ");
-    //Serial.println(bits);
-
-    //Serial.print("Šířka: ");
-    //Serial.println(width);
-    //Serial.print("Výška: ");
-    //Serial.println(height);
-
 
     // Přejděte na začátek pixelových dat
     uint32_t pixelDataOffset = *(uint32_t *)&bmpHeader[10];
@@ -121,9 +112,7 @@ void setup() {
   }
   Serial.println("SD karta byla úspěšně načtena :)");
   printBmpFiles(); // Volání funkce pro vypsání souborů
-
 }
-
 
 void loop() {
   if (!animation_running) {
