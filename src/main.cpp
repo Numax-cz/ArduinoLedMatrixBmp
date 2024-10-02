@@ -11,13 +11,8 @@
 #define PIN_CS 4                  // Pin pro SD kartu
 #define BACKGROUND_COLOR 0x000000 // Černá barva pozadí
 
-#define POWER_BUTTON 0
-#define VOLUME_BUTTON_UP 0
-#define VOLUME_BUTTON_DOWN 0
-
-//Proměnná doby, po kterou se má přečíst další obrázek
-const int data_read_period = 1000;
-unsigned long data_read_time_now = 0;
+bool forward = true;  // Proměnná, která sleduje směr animace
+int i = 0;  // Index pro obrázek
 bool animation_running = false;
 
 // Inicializace panelu
@@ -58,6 +53,7 @@ void showImage(String fileName) {
     //Serial.println(width);
     //Serial.print("Výška: ");
     //Serial.println(height);
+
 
     // Přejděte na začátek pixelových dat
     uint32_t pixelDataOffset = *(uint32_t *)&bmpHeader[10];
@@ -124,40 +120,31 @@ void setup() {
     while (true);
   }
   Serial.println("SD karta byla úspěšně načtena :)");
-  digitalWrite(49,HIGH);
   printBmpFiles(); // Volání funkce pro vypsání souborů
 
 }
 
+
 void loop() {
-
-  //Uložíme aktuální čas běhu do konstantní proměnné time 
-  const unsigned long time = millis();
-
-
-  if(recv.decode(&results)) {
-    if (results.value) Serial.println(results.value);
-  }
-
-
-  
-  //Načasování programu
-  //if(time >= data_read_time_now + data_read_period) {
-  //  data_read_time_now += data_read_period;
-  //}
-  
   if (!animation_running) {
-    for (int i = 1; i <= 19; i++) {
-      animation_running = true;
-      String imageName = "image" + String(i) + ".bmp";
-      showImage(imageName);
+    animation_running = true;
 
-    
-      if(i == 19) {
-        animation_running = false;
+    if (forward) {
+      // Animace směrem od 0 do 51
+      for (i = 0; i <= 51; i++) {
+        String imageName = "image" + String(i) + ".bmp";
+        showImage(imageName);
       }
+      forward = false;  // Po dosažení 51 otoč směr
+    } else {
+      // Animace směrem od 51 do 0
+      for (i = 51; i >= 0; i--) {
+        String imageName = "image" + String(i) + ".bmp";
+        showImage(imageName);
+      }
+      forward = true;  // Po dosažení 0 otoč směr zpět
     }
+
+    animation_running = false;
   }
-
-
 }
